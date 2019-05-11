@@ -14,6 +14,7 @@
     (lngExtent[1] - lngExtent[0]) / cellCount[0],
     (latExtent[1] - latExtent[0]) / cellCount[1]
   ];
+  var COLORS = ["#070093", "#1c3fbf", "#1482e5", "#70b4eb", "#b4e0f3", "#ffffff"];
 
 export default {
   name: 'index',
@@ -37,7 +38,34 @@ export default {
           resizeEnable: true,
           mapStyle: 'amap://styles/whitesmoke'
         },
-        // demo serie showing the capital BEIJING of our PRC :cn:
+        tooltip: {},
+        visualMap: {
+          type: 'piecewise',
+          inverse: true,
+          top: 10,
+          left: 10,
+          pieces: [{
+            value: 0, color: COLORS[0]
+          }, {
+            value: 1, color: COLORS[1]
+          }, {
+            value: 2, color: COLORS[2]
+          }, {
+            value: 3, color: COLORS[3]
+          }, {
+            value: 4, color: COLORS[4]
+          }, {
+            value: 5, color: COLORS[5]
+          }],
+          borderColor: '#ccc',
+          borderWidth: 2,
+          backgroundColor: '#eee',
+          dimension: 2,
+          inRange: {
+            color: COLORS,
+            opacity: 0.4
+          }
+        },
         series: [{
           type: "custom",
           // 使用高德地图坐标系
