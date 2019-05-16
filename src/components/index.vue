@@ -34,7 +34,7 @@ export default {
         // use amap component
         amap: {
           center: [120.13066322374, 30.240018034923],
-          zoom: 5,
+          zoom: 10,
           resizeEnable: true,
           mapStyle: 'amap://styles/whitesmoke'
         },
@@ -127,7 +127,7 @@ export default {
 
 <style scoped>
 .cloudMap{
-  width: 1920px;
+  width:100%;
   height: 1080px;
 }
 </style>
