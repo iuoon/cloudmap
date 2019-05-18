@@ -7,14 +7,14 @@
 </template>
 
 <script>
-  var COLORS = ["#070093", "#1c3fbf", "#1482e5", "#70b4eb", "#b4e0f3", "#ffffff"];
+  var COLORS = ["#ddf59a", "#8b6cf5", "#a4ffc1", "#cfb6ff", "#6ba3ff", "#00daff"];
 
 export default {
   name: 'index2',
   data () {
     return {
-      map:{}
-    }
+      map:{},
+  }
   },
   mounted() {
     this.init()
@@ -23,8 +23,8 @@ export default {
     init (){
       this.map = new AMap.Map(this.$refs.cloudMap, {
         center: [114.291362,30.566915],
-        zoom: 8,
-        zoomEnable: true,
+        zoom: 10,
+        resizeEnable: true,
         keyboardEnable: true,//地图是否可通过键盘控制
         dragEnable: true,//地图是否可通过鼠标拖拽平移
         showLabel: true ,//是否显示地图文字标记
@@ -44,38 +44,47 @@ export default {
     },
     showGrid(){
       var self=this;
-      var XY = {x1: 114.10202, y1: 30.406264, x2: 114.494437, y2: 30.725529};
+      var XY = this.getCurrentBounds();
       console.log(XY);
-
-      var i = XY.x1;
-      while ( i < XY.x2) {
-         var j = XY.y2;
-         while ( i < XY.x2) {
-
-         }
-        i = i + 0.0126;
+      var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(30, 30)});
+      function infoClose(e) {
+        infoWindow.close(self.map, e.target.getPosition());
       }
-      for (var i = XY.x1; i < XY.x2; i = i + 0.0126) {
-        for (var j = XY.y2; j > XY.y1; j = j - 0.0072) {
+      function infoOpen(e) {
+        infoWindow.setContent(e.target.content);
+        infoWindow.open(self.map,e.target.getPath()[0]);
+      }
+
+      for (var i = XY.x1; i < XY.x2; i = i + 0.5) {
+        for (var j = XY.y2; j > XY.y1; j = j - 0.5) {
+             var num=Math.floor(Math.random()*6);
           //此类表示绘制一个多边形覆盖物（注意:一定要下面的Point列表为多变形的顶点,描线顺序为从上到下,从左到右，顺序乱了,绘制出来的多边形也会乱，如图二所示，图二是将顶点的顺序给错了（网格左上端点,网格///左下端点，网格右上端点，网格右下端点））
-
-
              var polygon = new AMap.Polygon({
-               map: this.map,
-               path: [[i, j],[i, j-0.0072],[i+0.0126, j-0.0072],[i+0.0126, j]],
+               path: [[i, j],[i, j-0.5],[i+0.5, j-0.5],[i+0.5, j]],
                strokeColor:"#ccc",
                strokeWeight:1,
                strokeOpacity:0.2,
-               fillColor: COLORS[1],
-               fillOpacity: 0.5
+               fillColor: COLORS[num],
+               fillOpacity: 0.07*num,
              });
-             polygon.on("click",function(e){
-             	alert("你居然敢点我");
-             });
+            polygon.content =
+            '<div className="custom-infowindow input-card">' +
+            '<label style="color:grey">网格数据</label>' +
+            '<div class="input-item">' +
+            '<div class="input-item-prepend">' +
+            '<span class="input-item-text" >'+i+','+j+'</span>' +
+            '</div>' +
+              '<div class="input-item-prepend">' +
+              '<span class="input-item-text" >邮箱：</span>' +
+              '</div>' +
+            '<input id="email" type="mail"/>' +
+            '</div>' +
+            '<input id="downloadBtn" type="button" class="btn" value="下载网格数据" onclick="function f() { console.log(1); }"/>' +
+            '</div>';
+             polygon.on("click",infoOpen);
 
+             polygon.on('mouseover', infoOpen);
              polygon.setMap(self.map);
-
-
         }
       }
     },
@@ -105,6 +114,7 @@ export default {
         });
       });
     }
+
   }
 }
 </script>
