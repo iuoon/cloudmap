@@ -1,8 +1,41 @@
 <template>
   <div>
-    <div ref="cloudMap" class="cloudMap">
+    <Row>
+      <Col span="20">
+        <div ref="cloudMap" class="cloudMap"></div>
+      </Col>
+      <Col span="2">
+        <div style="margin-left: 5px;width: 100%">
+          <Card :dis-hover="true" style="width:260px">
+            <p slot="title">当前选中网格</p>
+            <p>网格编号：{{grid.id}}</p>
+            <p>网格信息：{{grid.color}}</p>
+          </Card>
+        </div>
+        <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
+          <Select v-model="proTip" placeholder="选择省" style="width:200px">
+            <Option value="beijing">北京</Option>
+            <Option value="shanghai">天津</Option>
+            <Option value="shenzhen">上海</Option>
+          </Select>
+        </div>
+        <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
+          <Select v-model="cityTip" placeholder="选择区" style="width:200px">
+            <Option value="beijing">朝阳区</Option>
+            <Option value="shanghai">浦东区</Option>
+            <Option value="shenzhen">滨海新区</Option>
+          </Select>
+        </div>
+        <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
+          <Input placeholder="请输入邮箱" style="width: 260px"><Icon type="ios-mail" slot="prefix" /></Input>
+        </div>
+        <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
+          <Button type="success" style="width: 260px">下载选中网格数据</Button>
+        </div>
+      </Col>
+    </Row>
 
-    </div>
+
   </div>
 </template>
 
@@ -15,6 +48,14 @@ export default {
   data () {
     return {
       map:{},
+      grid:{
+        id:'',
+        color:'',
+        name:'',
+        description:''
+      },
+      proTip:'选择省',
+      cityTip:'选择市'
   }
   },
   mounted() {
@@ -55,6 +96,13 @@ export default {
         infoWindow.setContent(e.target.content);
         infoWindow.open(self.map,e.target.getPath()[0]);
       }
+      function changeSelectGrid(e) {
+        console.log(e)
+        self.grid.id='1'
+        self.grid.color=e.target.B.fillColor
+
+        e.target.fillColor='#F5EB53'
+      }
 
       for (var i = XY.x1; i < XY.x2; i = i + 0.5) {
         for (var j = XY.y2; j > XY.y1; j = j - 0.5) {
@@ -82,9 +130,9 @@ export default {
             '</div>' +
             '<input id="downloadBtn" type="button" class="btn" style="margin-left: 25%;margin-top: 8px;" value="下载网格数据" onclick="downloadData()"/>' +
             '</div>';
-             polygon.on("click",infoOpen);
-
-             polygon.on('mouseover', infoOpen);
+             //polygon.on("click",infoOpen);
+             polygon.on("click",changeSelectGrid);
+             //polygon.on('mouseover', infoOpen);
              polygon.setMap(self.map);
         }
       }
