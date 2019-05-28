@@ -6,31 +6,37 @@
       </Col>
       <Col span="2">
         <div style="margin-left: 5px;width: 100%">
-          <Card :dis-hover="true" style="width:260px">
+          <Card :dis-hover="true" style="width:240px">
             <p slot="title">当前选中网格</p>
-            <p>网格编号：{{selectGrids}}</p>
+            <div style="width:240px"><p>网格编号：{{getIds()}}</p></div>
             <p>网格信息：</p>
           </Card>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Select v-model="provinces" placeholder="选择省" style="width:200px">
+          <Select v-model="provinces" placeholder="选择省" style="width:240px">
             <Option value="beijing">北京</Option>
             <Option value="shanghai">天津</Option>
             <Option value="shenzhen">上海</Option>
           </Select>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Select v-model="citys" placeholder="选择区" style="width:200px">
+          <Select v-model="citys" placeholder="选择区" style="width:240px">
             <Option value="beijing">朝阳区</Option>
             <Option value="shanghai">浦东区</Option>
             <Option value="shenzhen">滨海新区</Option>
           </Select>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Input placeholder="请输入邮箱" style="width: 260px"><Icon type="ios-mail" slot="prefix" /></Input>
+          <Input placeholder="请输入邮箱" style="width: 240px"><Icon type="ios-mail" slot="prefix" /></Input>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Button type="success" style="width: 260px">下载选中网格数据</Button>
+          <Button type="success" style="width: 240px">下载选中网格数据</Button>
+        </div>
+        <div style="margin-left: 5px;width: 100%;margin-top: 30px;">
+          <Input v-model="fankui" type="textarea" :rows="4" placeholder="填写反馈信息" style="width: 240px" />
+        </div>
+        <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
+          <Button type="success" style="width: 240px">提交反馈信息</Button>
         </div>
       </Col>
     </Row>
@@ -51,7 +57,8 @@ export default {
       selectGrids:[],
       selectPloygons:[],
       provinces:'选择省',
-      citys:'选择市'
+      citys:'选择市',
+      fankui:''
   }
   },
   mounted() {
@@ -111,7 +118,6 @@ export default {
         ploygon.setMap(self.map);
 
         self.selectPloygons.push(ploygon);
-
         console.log(e)
         var grid={id:e.target._amap_id}
         self.selectGrids.push(grid)
@@ -176,6 +182,20 @@ export default {
           });
         });
       });
+    },
+    getIds(){
+      let ids='';
+      console.log(this.selectGrids)
+      for(var i=0;i<this.selectGrids.length;i++){
+        if (i==0) {
+          ids=ids+this.selectGrids[i].id
+        }else if (i/4==0) {
+          ids=ids+'<br>'
+        }else{
+          ids=ids+','+this.selectGrids[i].id
+        }
+      }
+      return ids;
     }
   }
 }
