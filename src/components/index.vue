@@ -8,19 +8,19 @@
         <div style="margin-left: 5px;width: 100%">
           <Card :dis-hover="true" style="width:260px">
             <p slot="title">当前选中网格</p>
-            <p>网格编号：{{grid.id}}</p>
-            <p>网格信息：{{grid.color}}</p>
+            <p>网格编号：{{selectGrids}}</p>
+            <p>网格信息：</p>
           </Card>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Select v-model="proTip" placeholder="选择省" style="width:200px">
+          <Select v-model="provinces" placeholder="选择省" style="width:200px">
             <Option value="beijing">北京</Option>
             <Option value="shanghai">天津</Option>
             <Option value="shenzhen">上海</Option>
           </Select>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Select v-model="cityTip" placeholder="选择区" style="width:200px">
+          <Select v-model="citys" placeholder="选择区" style="width:200px">
             <Option value="beijing">朝阳区</Option>
             <Option value="shanghai">浦东区</Option>
             <Option value="shenzhen">滨海新区</Option>
@@ -48,14 +48,10 @@ export default {
   data () {
     return {
       map:{},
-      grid:{
-        id:'',
-        color:'',
-        name:'',
-        description:''
-      },
-      proTip:'选择省',
-      cityTip:'选择市'
+      selectGrids:[],
+      selectPloygons:[],
+      provinces:'选择省',
+      citys:'选择市'
   }
   },
   mounted() {
@@ -97,11 +93,29 @@ export default {
         infoWindow.open(self.map,e.target.getPath()[0]);
       }
       function changeSelectGrid(e) {
-        console.log(e)
-        self.grid.id='1'
-        self.grid.color=e.target.B.fillColor
+        if (event.shiftKey !=1){
+          //判断没有按下shift键则清除之前选中的网格
+          for(var i=0;i<self.selectPloygons.length;i++){
+            self.map.remove(self.selectPloygons[i])
+          }
+          self.selectPloygons=[]
+        }
+        var ploygon=new AMap.Polygon({
+          path: e.target.getPath(),
+          strokeColor:"#ff1b0e",
+          strokeWeight:1,
+          strokeOpacity:1,
+          fillColor: "#fffc00",
+          fillOpacity: 0.7,
+        });
+        ploygon.setMap(self.map);
 
-        e.target.fillColor='#F5EB53'
+        self.selectPloygons.push(ploygon);
+
+        console.log(e)
+        var grid={id:e.target._amap_id}
+        self.selectGrids.push(grid)
+
       }
 
       for (var i = XY.x1; i < XY.x2; i = i + 0.5) {
