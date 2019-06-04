@@ -13,24 +13,18 @@
           </Card>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Select v-model="provinces" placeholder="选择省" style="width:240px">
-            <Option value="beijing">北京</Option>
-            <Option value="shanghai">天津</Option>
-            <Option value="shenzhen">上海</Option>
+          <Select v-model="province" @on-change="choseProvince" placeholder="选择省" style="width:240px">
+            <Option v-for="item in provinceList" :value="item.value" :key="item.value">{{ item.label }}</Option>
           </Select>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Select v-model="citys" placeholder="选择市" style="width:240px">
-            <Option value="beijing">朝阳区</Option>
-            <Option value="shanghai">浦东区</Option>
-            <Option value="shenzhen">滨海新区</Option>
+          <Select v-model="city" @on-change="choseCity" placeholder="选择市" style="width:240px">
+            <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
           </Select>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Select v-model="citys" placeholder="选择区" style="width:240px">
-            <Option value="beijing">朝阳区</Option>
-            <Option value="shanghai">浦东区</Option>
-            <Option value="shenzhen">滨海新区</Option>
+          <Select v-model="area" @on-change="choseArea" placeholder="选择区" style="width:240px">
+            <Option v-for="item in areaList" :value="item.value" :key="item.value">{{ item.label }}</Option>
           </Select>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
@@ -66,22 +60,19 @@ export default {
       map:{},
       selectGrids:[],
       selectPloygons:[],
-      provinces:'选择省',
-      citys:'选择市',
       fankui:'',
-      mapJson:'../static/json/map.json',
+      mapJson:'../static/map.json',
+      provinceList:[],
+      cityList:[],
+      areaList:[],
       province:'',
-      sheng: '',
-      shi: '',
-      shi1: [],
-      qu: '',
-      qu1: [],
       city:'',
-      block:'',
+      area:'',
     }
   },
   mounted() {
-    this.init()
+    this.init();
+    this.initCityData();
   },
   methods:{
     init (){
@@ -217,75 +208,36 @@ export default {
       return ids;
     },
     //省市区三级加载
-    getCityData:function(){
-      var that = this
-      axios.get(this.mapJson).then(function(response){
-        if (response.status==200) {
-          var data = response.data
-          that.province = []
-          that.city = []
-          that.block = []
-          // 省市区数据分类
-          for (var item in data) {
-            if (item.match(/0000$/)) {//省
-              that.province.push({id: item, value: data[item], children: []})
-            } else if (item.match(/00$/)) {//市
-              that.city.push({id: item, value: data[item], children: []})
-            } else {//区
-              that.block.push({id: item, value: data[item]})
-            }
-          }
-          // 分类市级
-          for (var index in that.province) {
-            for (var index1 in that.city) {
-              if (that.province[index].id.slice(0, 2) === that.city[index1].id.slice(0, 2)) {
-                that.province[index].children.push(that.city[index1])
-              }
-            }
-          }
-          // 分类区级
-          for(var item1 in that.city) {
-            for(var item2 in that.block) {
-              if (that.block[item2].id.slice(0, 4) === that.city[item1].id.slice(0, 4)) {
-                that.city[item1].children.push(that.block[item2])
-              }
-            }
-          }
-        }
-        else{
-          console.log(response.status)
-        }
-      }).catch(function(error){console.log(typeof+ error)})
+    initCityData:function(){
+      axios.get(this.mapJson).then((data) => {
+        console.log(data.data);
+        this.provinceList = data.data
+      })
     },
     // 选省
     choseProvince:function(e) {
-      for (var index2 in this.province) {
-        if (e === this.province[index2].id) {
-          console.log(this.province[index2].id)//你选择的省级编码
-          console.log(this.province[index2].value)//省级编码 对应的汉字
-          this.shi1 = this.province[index2].children
-          this.shi = this.province[index2].children[0].value
-          this.qu1 =this.province[index2].children[0].children
-          this.qu = this.province[index2].children[0].children[0].value
-          this.E = this.qu1[0].id
+      console.log(e)
+      for (var i = 0; i < this.provinceList.length;i++) {
+        if (e === this.provinceList[i].value) {
+          this.cityList=this.provinceList[i].children
+          break;
         }
       }
+
     },
     // 选市
     choseCity:function(e) {
-      for (var index3 in this.city) {
-        if (e === this.city[index3].id) {
-          this.qu1 = this.city[index3].children
-          this.qu = this.city[index3].children[0].value
-          this.E = this.qu1[0].id
-          // console.log(this.E)
+      console.log(e)
+      for (var i = 0; i < this.cityList.length;i++) {
+        if (e === this.cityList[i].value) {
+          this.areaList = this.cityList[i].children
+          break;
         }
       }
     },
     // 选区
-    choseBlock:function(e) {
-      this.E=e;
-      // console.log(this.E)
+    choseArea:function(e) {
+      console.log(e)
     },
 
   }
