@@ -13,6 +13,11 @@
           </Card>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
+          <Select v-model="attr" placeholder="选择属性" style="width:240px">
+            <Option v-for="item in attrs" :value="item.value" :key="item.value">{{ item.label }}</Option>
+          </Select>
+        </div>
+        <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
           <Select v-model="province" @on-change="choseProvince" placeholder="选择省" style="width:240px">
             <Option v-for="item in provinceList" :value="item.value" :key="item.value">{{ item.label }}</Option>
           </Select>
@@ -68,9 +73,19 @@ export default {
       province:'',
       city:'',
       area:'',
+      attr:'',
+      attrs:[{"label":"属性1","value":"1"},{"label":"属性2","value":"2"},{"label":"属性3","value":"3"}],
+      prezoom:8,
+      currentzoom:8,
     }
   },
   mounted() {
+    var userAgent = navigator.userAgent;
+    if (userAgent.indexOf("Firefox") > -1) {
+      window.addEventListener("DOMMouseScroll",this.handleScroll,false)
+    }else{
+      window.addEventListener('mousewheel',this.handleScroll,false)
+    }
     this.init();
     this.initCityData();
   },
@@ -78,7 +93,7 @@ export default {
     init (){
       this.map = new AMap.Map(this.$refs.cloudMap, {
         center: [114.291362,30.566915],
-        zoom: 10,
+        zoom: 8,
         resizeEnable: true,
         keyboardEnable: true,//地图是否可通过键盘控制
         dragEnable: true,//地图是否可通过鼠标拖拽平移
@@ -134,12 +149,12 @@ export default {
 
       }
 
-      for (var i = XY.x1; i < XY.x2; i = i + 0.5) {
-        for (var j = XY.y2; j > XY.y1; j = j - 0.5) {
+      for (var i = XY.x1; i < XY.x2; i = i + 0.3) {
+        for (var j = XY.y2; j > XY.y1; j = j - 0.3) {
              var num=Math.floor(Math.random()*6);
           //此类表示绘制一个多边形覆盖物（注意:一定要下面的Point列表为多变形的顶点,描线顺序为从上到下,从左到右，顺序乱了,绘制出来的多边形也会乱，如图二所示，图二是将顶点的顺序给错了（网格左上端点,网格///左下端点，网格右上端点，网格右下端点））
              var polygon = new AMap.Polygon({
-               path: [[i, j],[i, j-0.5],[i+0.5, j-0.5],[i+0.5, j]],
+               path: [[i, j],[i, j-0.3],[i+0.3, j-0.3],[i+0.3, j]],
                strokeColor:"#ccc",
                strokeWeight:1,
                strokeOpacity:0.2,
@@ -166,6 +181,9 @@ export default {
              polygon.setMap(self.map);
         }
       }
+    },
+    clearGrid(){
+
     },
     showAreaBounds(){
       var self=this;
@@ -207,6 +225,17 @@ export default {
       }
       return ids;
     },
+    handleScroll(){
+      console.log(this.map.getZoom())
+      this.currentzoom=this.map.getZoom()
+    },
+    updated:function(){
+      this.$nextTick(function(){
+        if(this.currentzoom != this.prezoom){
+
+        }
+      })
+    },
     //省市区三级加载
     initCityData:function(){
       axios.get(this.mapJson).then((data) => {
@@ -216,10 +245,11 @@ export default {
     },
     // 选省
     choseProvince:function(e) {
-      console.log(e)
       for (var i = 0; i < this.provinceList.length;i++) {
         if (e === this.provinceList[i].value) {
           this.cityList=this.provinceList[i].children
+          this.areaList=[]
+          this.area=''
           break;
         }
       }
@@ -227,7 +257,6 @@ export default {
     },
     // 选市
     choseCity:function(e) {
-      console.log(e)
       for (var i = 0; i < this.cityList.length;i++) {
         if (e === this.cityList[i].value) {
           this.areaList = this.cityList[i].children
