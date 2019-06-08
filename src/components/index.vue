@@ -59,7 +59,7 @@
 
 
 export default {
-  name: 'index2',
+  name: 'index',
   data () {
     return {
       map:{},
@@ -73,10 +73,11 @@ export default {
       province:'',
       city:'',
       area:'',
-      attr:'',
-      attrs:[{"label":"属性1","value":"1"},{"label":"属性2","value":"2"},{"label":"属性3","value":"3"}],
-      prezoom:8,
-      currentzoom:8,
+      attr:'',//当前网格属性
+      attrs:[{"label":"属性1","value":"1"},{"label":"属性2","value":"2"},{"label":"属性3","value":"3"}], //选择网格属性
+      overlays:[], //选择框
+      prezoom:8, //前缩放级别
+      currentzoom:8,//当前缩放级别
     }
   },
   mounted() {
@@ -112,6 +113,27 @@ export default {
        var bsne = bs.getNorthEast();		//获取东北角的经纬度(右上端点)
        return { 'x1': bssw.lng, 'y1': bssw.lat, 'x2': bsne.lng, 'y2': bsne.lat };
     },
+    initGrid(){
+      var self=this;
+      axios.get("http://localhost:8082/shape/getData?point=87.77962526630337,33.53587510891327").then((res) => {
+        let  list= res.data.data
+
+        for(var i = 0,len=list.length; i < len; i++) {
+          var patharr=list[i].the_geom;
+          console.log(patharr)
+          var num=Math.floor(Math.random()*6);
+          var polygon = new AMap.Polygon({
+            path: patharr,
+            strokeColor:"#ccc",
+            strokeWeight:1,
+            strokeOpacity:0.2,
+            fillColor: COLORS[num],
+            fillOpacity: 0.07*num,
+          });
+          polygon.setMap(self.map);
+        }
+      })
+    },
     showGrid(){
       var self=this;
       var XY = this.getCurrentBounds();
@@ -125,11 +147,11 @@ export default {
         infoWindow.open(self.map,e.target.getPath()[0]);
       }
       function changeSelectGrid(e) {
-        if (event.shiftKey !=1){
+        if (event.shiftKey !=1) {
           //判断没有按下shift键则清除之前选中的网格
-          for(var i=0;i<self.selectPloygons.length;i++){
-            self.map.remove(self.selectPloygons[i])
-          }
+          //for(var i=0;i<self.selectPloygons.length;i++){
+          self.map.remove(self.selectPloygons)
+          //}
           self.selectPloygons=[]
         }
         var ploygon=new AMap.Polygon({
@@ -181,6 +203,35 @@ export default {
              polygon.setMap(self.map);
         }
       }
+
+
+
+      var polygon_t = new AMap.Polygon({
+        path: [[115.79011490197605,44.89508474224183],[115.91679790903335,44.88538600295825],[115.90297162495256,44.79638930050085],[115.77643316632485,44.80610526526714]],
+        strokeColor:"#ccc",
+        strokeWeight:1,
+        strokeOpacity:0.2,
+        fillColor: "#cc0019",
+        fillOpacity: 1,
+      });
+      polygon_t.setMap(self.map);
+
+      var mouseTool = new AMap.MouseTool(self.map);
+      mouseTool.rectangle({
+        fillColor:'#00b0ff',
+        strokeColor:'#80d8ff'
+        //同Polygon的Option设置
+      });
+      mouseTool.on('draw',function(e){
+        //绘制矩形框结束时触发该事件, //计算哪些框在矩形内
+        //先清除之前选择的，然后重新计算
+        var drawobj=e.obj
+        console.log(222)
+        // for(var i=0;i<self.selectPloygons.length;i++){
+        //   self.map.remove(self.selectPloygons[i])
+        // }
+        self.map.remove(drawobj)
+      })
     },
     clearGrid(){
 
@@ -226,11 +277,14 @@ export default {
       return ids;
     },
     handleScroll(){
+      let center=this.map.getCenter()
       console.log(this.map.getZoom())
+      console.log(center.lat,center.lng)
       this.currentzoom=this.map.getZoom()
     },
     updated:function(){
       this.$nextTick(function(){
+        //缩放级别改变的时候，清除之前的网格覆盖，对网格聚合重建
         if(this.currentzoom != this.prezoom){
 
         }
