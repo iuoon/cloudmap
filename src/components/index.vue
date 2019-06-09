@@ -86,7 +86,8 @@ export default {
       prezoom:8, //前缩放级别
       currentzoom:8,//当前缩放级别
       year:2007,  //年份
-      yearList:[2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]
+      yearList:[2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019],
+      point:"87.77962526630337,33.53587510891327",
     }
   },
   mounted() {
@@ -130,7 +131,7 @@ export default {
     },
     initGrid(){
       var self=this;
-      axios.get("http://localhost:8082/shape/getData/2007?point=87.77962526630337,33.53587510891327").then((res) => {
+      axios.get("http://localhost:8082/shape/getData/"+self.year+"?point="+self.point).then((res) => {
         let  list= res.data.data
 
         for(var i = 0,len=list.length; i < len; i++) {
@@ -291,16 +292,28 @@ export default {
       return ids;
     },
     handleScroll(){
+      var self=this;
       let center=this.map.getCenter()
       console.log(this.map.getZoom())
-      console.log(center.lat,center.lng)
+      this.prezoom=this.currentzoom
       this.currentzoom=this.map.getZoom()
-    },
-    updated:function(){
+      this.point=center.lng+","+center.lat
       this.$nextTick(function(){
         //缩放级别改变的时候，清除之前的网格覆盖，对网格聚合重建
         if(this.currentzoom != this.prezoom){
-
+          self.map.clearMap()
+          self.initGrid()
+        }
+      })
+    },
+    updated(){
+      var self=this;
+      console.log(this.currentzoom,this.prezoom)
+      this.$nextTick(function(){
+        //缩放级别改变的时候，清除之前的网格覆盖，对网格聚合重建
+        if(this.currentzoom != this.prezoom){
+           self.map.clearMap()
+           self.initGrid()
         }
       })
     },
@@ -336,7 +349,18 @@ export default {
     choseArea:function(e) {
       console.log(e)
     },
+    // 选年
+    choseYear:function(e){
+       console.log(e)
+       this.map.clearMap();
+       this.year=e
+       this.initGrid()
+    },
+    // 选属性
+    choseAttr:function(e){
+      console.log(e)
 
+    }
   }
 }
 </script>
