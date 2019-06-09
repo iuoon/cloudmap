@@ -88,6 +88,7 @@ export default {
       year:2007,  //年份
       yearList:[2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019],
       point:"87.77962526630337,33.53587510891327",
+      ploygons:[],
     }
   },
   mounted() {
@@ -114,7 +115,7 @@ export default {
           // 卫星
           new AMap.TileLayer.Satellite(),
           // 路网
-          new AMap.TileLayer.RoadNet()
+          new AMap.TileLayer.RoadNet({opacity:0.3})
         ],
       });
       var self=this;
@@ -133,19 +134,22 @@ export default {
       var self=this;
       axios.get("http://localhost:8082/shape/getData/"+self.year+"?point="+self.point).then((res) => {
         let  list= res.data.data
-
         for(var i = 0,len=list.length; i < len; i++) {
           var patharr=list[i].the_geom;
-          var num=Math.floor(Math.random()*8);
+          var num=(this.getAtrrValue(list[i])*10)%8
           var polygon = new AMap.Polygon({
             path: patharr,
-            strokeColor:"#ccc",
+            strokeColor:"#0f0f0f",
             strokeWeight:1,
             strokeOpacity:0.2,
             fillColor: COLORS[num],
             fillOpacity: 0.7,
           });
           polygon.setMap(self.map);
+          polygon.Water=list[i].Water;
+          polygon.SVC=list[i].SVC;
+          polygon.Aviation=list[i].Aviation;
+          self.ploygons.push(polygon);
         }
       })
     },
@@ -291,6 +295,17 @@ export default {
       }
       return ids;
     },
+    getAtrrValue(obj){
+      if(this.attr=='Water'){
+        return obj.Water
+      }
+      if(this.attr=='SVC'){
+        return obj.SVC
+      }
+      if(this.attr=='Aviation'){
+        return obj.Aviation
+      }
+    },
     handleScroll(){
       var self=this;
       let center=this.map.getCenter()
@@ -302,7 +317,10 @@ export default {
         //缩放级别改变的时候，清除之前的网格覆盖，对网格聚合重建
         if(this.currentzoom != this.prezoom){
           self.map.clearMap()
-          self.initGrid()
+          self.ploygons=[];
+          setTimeout(function () {
+            self.initGrid();
+          },200)
         }
       })
     },
@@ -313,7 +331,10 @@ export default {
         //缩放级别改变的时候，清除之前的网格覆盖，对网格聚合重建
         if(this.currentzoom != this.prezoom){
            self.map.clearMap()
-           self.initGrid()
+           self.ploygons=[];
+           setTimeout(function () {
+            self.initGrid();
+          },200)
         }
       })
     },
@@ -352,14 +373,23 @@ export default {
     // 选年
     choseYear:function(e){
        console.log(e)
+       var self=this;
        this.map.clearMap();
+       this.ploygons=[];
        this.year=e
-       this.initGrid()
+       setTimeout(function () {
+        self.initGrid();
+       },200)
     },
     // 选属性
     choseAttr:function(e){
       console.log(e)
-
+      this.attr=e
+      for(var i=0;i<this.ploygons.length;i++){
+        var num=this.getAtrrValue(this.ploygons[i])*10%8
+        var color=COLORS[num]
+        this.ploygons[i].fillColor=color
+      }
     }
   }
 }
