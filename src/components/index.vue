@@ -3,6 +3,18 @@
     <Row>
       <Col span="20">
         <div ref="cloudMap" class="cloudMap"></div>
+        <div class="input-card">
+
+          <div>
+            年份：<Select v-model="year" placeholder="选择年份" style="width:6rem" @on-change="choseYear">
+              <Option v-for="item in yearList" :value="item" :key="item">{{ item }}</Option>
+            </Select>
+            属性：<Select v-model="attr" placeholder="选择属性" style="width:6rem" @on-change="choseAttr">
+              <Option v-for="item in attrs" :value="item.value" :key="item.value">{{ item.label }}</Option>
+            </Select>
+
+          </div>
+        </div>
       </Col>
       <Col span="2">
         <div style="margin-left: 5px;width: 100%">
@@ -11,11 +23,6 @@
             <div style="width:240px"><p>网格编号：{{getIds()}}</p></div>
             <p>网格信息：</p>
           </Card>
-        </div>
-        <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Select v-model="attr" placeholder="选择属性" style="width:240px">
-            <Option v-for="item in attrs" :value="item.value" :key="item.value">{{ item.label }}</Option>
-          </Select>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
           <Select v-model="province" @on-change="choseProvince" placeholder="选择省" style="width:240px">
@@ -55,7 +62,7 @@
 
   import axios from 'axios'
 
-  var COLORS = ["#ddf59a", "#8b6cf5", "#a4ffc1", "#cfb6ff", "#6ba3ff", "#00daff"];
+  var COLORS = ["#00F61F","#72F657","#B4F67C","#EEF68F","#F6CC84","#F69D6B","#F65D42","#F6231E"];
 
 
 export default {
@@ -73,11 +80,13 @@ export default {
       province:'',
       city:'',
       area:'',
-      attr:'',//当前网格属性
-      attrs:[{"label":"属性1","value":"1"},{"label":"属性2","value":"2"},{"label":"属性3","value":"3"}], //选择网格属性
+      attr:"Water",//当前网格属性
+      attrs:[{"label":"Water","value":"Water"},{"label":"SVC","value":"SVC"},{"label":"Aviation","value":"Aviation"}], //选择网格属性
       overlays:[], //选择框
       prezoom:8, //前缩放级别
       currentzoom:8,//当前缩放级别
+      year:2007,  //年份
+      yearList:[2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]
     }
   },
   mounted() {
@@ -99,11 +108,17 @@ export default {
         keyboardEnable: true,//地图是否可通过键盘控制
         dragEnable: true,//地图是否可通过鼠标拖拽平移
         showLabel: true ,//是否显示地图文字标记
-        mapStyle: 'amap://styles/whitesmoke' //地图样式
+        mapStyle: 'amap://styles/whitesmoke', //地图样式
+        layers: [
+          // 卫星
+          new AMap.TileLayer.Satellite(),
+          // 路网
+          new AMap.TileLayer.RoadNet()
+        ],
       });
       var self=this;
       setTimeout(function () {
-        self.showGrid();
+        self.initGrid();
       },1000)
       this.showAreaBounds();
     },
@@ -115,20 +130,19 @@ export default {
     },
     initGrid(){
       var self=this;
-      axios.get("http://localhost:8082/shape/getData?point=87.77962526630337,33.53587510891327").then((res) => {
+      axios.get("http://localhost:8082/shape/getData/2007?point=87.77962526630337,33.53587510891327").then((res) => {
         let  list= res.data.data
 
         for(var i = 0,len=list.length; i < len; i++) {
           var patharr=list[i].the_geom;
-          console.log(patharr)
-          var num=Math.floor(Math.random()*6);
+          var num=Math.floor(Math.random()*8);
           var polygon = new AMap.Polygon({
             path: patharr,
             strokeColor:"#ccc",
             strokeWeight:1,
             strokeOpacity:0.2,
             fillColor: COLORS[num],
-            fillOpacity: 0.07*num,
+            fillOpacity: 0.7,
           });
           polygon.setMap(self.map);
         }
@@ -331,5 +345,24 @@ export default {
 .cloudMap{
   width:100%;
   height: 1080px;
+}
+.input-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: #fff;
+  background-clip: border-box;
+  border-radius: .25rem;
+  width: 22rem;
+  border-width: 0;
+  border-radius: 0.4rem;
+  box-shadow: 0 2px 6px 0 rgba(114, 124, 245, .5);
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  padding: 0.75rem 1.25rem;
 }
 </style>
