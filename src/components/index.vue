@@ -14,11 +14,7 @@
           </div>
         </div>
 
-        <div class="input-card2">
-          <div id="histogram" style="width: 300px;height: 300px">
 
-          </div>
-        </div>
       </Col>
       <Col span="2">
         <div style="margin-left: 5px;width: 100%">
@@ -59,6 +55,11 @@
     </Row>
 
 
+    <div class="input-card2">
+      <div id="histogram" style="width: 300px;height: 300px">
+
+      </div>
+    </div>
   </div>
 </template>
 
@@ -97,7 +98,7 @@ export default {
       ploygons:[],
     }
   },
-  beforeCreate(){
+  created(){
     this.initHistogram(this);
   },
   mounted() {
@@ -109,9 +110,9 @@ export default {
     }
     this.init();
     this.initCityData();
-    this.$nextTick(function(){
-      this.eChart= echarts.init(document.getElementById('histogram'));
-    });
+
+    this.eChart= echarts.init(document.getElementById('histogram'));
+
 
   },
   methods:{
