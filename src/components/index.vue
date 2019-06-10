@@ -15,7 +15,7 @@
         </div>
 
         <div class="input-card2">
-          <div id="histogram">
+          <div id="histogram" style="width: 300px;height: 300px">
 
           </div>
         </div>
@@ -97,6 +97,9 @@ export default {
       ploygons:[],
     }
   },
+  beforeCreate(){
+    this.initHistogram(this);
+  },
   mounted() {
     var userAgent = navigator.userAgent;
     if (userAgent.indexOf("Firefox") > -1) {
@@ -106,7 +109,10 @@ export default {
     }
     this.init();
     this.initCityData();
-    this.initHistogram();
+    this.$nextTick(function(){
+      this.eChart= echarts.init(document.getElementById('histogram'));
+    });
+
   },
   methods:{
     init (){
@@ -161,8 +167,7 @@ export default {
       })
     },
     //初始化直方图
-    initHistogram(){
-      this.eChart= echarts.init(document.getElementById('histogram'));
+    initHistogram(self){
       var option = {
         color: ['#3398DB'],
         tooltip : {
@@ -201,7 +206,7 @@ export default {
         ]
       };
       if (option && typeof option === "object") {
-        this.eChart.setOption(option, true);
+        self.eChart.setOption(option);
       }
     },
     showGrid(){
@@ -449,7 +454,7 @@ export default {
 <style scoped>
 .cloudMap{
   width:100%;
-  height: 1080px;
+  height: 720px;
 }
 .input-card {
     display: flex;
