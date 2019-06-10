@@ -4,7 +4,6 @@
       <Col span="20">
         <div ref="cloudMap" class="cloudMap"></div>
         <div class="input-card">
-
           <div>
             年份：<Select v-model="year" placeholder="选择年份" style="width:6rem" @on-change="choseYear">
               <Option v-for="item in yearList" :value="item" :key="item">{{ item }}</Option>
@@ -12,6 +11,11 @@
             属性：<Select v-model="attr" placeholder="选择属性" style="width:6rem" @on-change="choseAttr">
               <Option v-for="item in attrs" :value="item.value" :key="item.value">{{ item.label }}</Option>
             </Select>
+          </div>
+        </div>
+
+        <div class="input-card2">
+          <div id="histogram">
 
           </div>
         </div>
@@ -61,6 +65,7 @@
 <script>
 
   import axios from 'axios'
+  import echarts from 'echarts'
 
   var COLORS = ["#00F61F","#72F657","#B4F67C","#EEF68F","#F6CC84","#F69D6B","#F65D42","#F6231E"];
 
@@ -70,6 +75,7 @@ export default {
   data () {
     return {
       map:{},
+      eChart:{},
       selectGrids:[],
       selectPloygons:[],
       fankui:'',
@@ -100,6 +106,7 @@ export default {
     }
     this.init();
     this.initCityData();
+    this.initHistogram();
   },
   methods:{
     init (){
@@ -152,6 +159,50 @@ export default {
           self.ploygons.push(polygon);
         }
       })
+    },
+    //初始化直方图
+    initHistogram(){
+      this.eChart= echarts.init(document.getElementById('histogram'));
+      var option = {
+        color: ['#3398DB'],
+        tooltip : {
+          trigger: 'axis',
+          axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+          }
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis : [
+          {
+            type : 'category',
+            data : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            axisTick: {
+              alignWithLabel: true
+            }
+          }
+        ],
+        yAxis : [
+          {
+            type : 'value'
+          }
+        ],
+        series : [
+          {
+            name:'值',
+            type:'bar',
+            barWidth: '60%',
+            data:[10, 52, 200, 334, 390, 330, 220]
+          }
+        ]
+      };
+      if (option && typeof option === "object") {
+        this.eChart.setOption(option, true);
+      }
     },
     showGrid(){
       var self=this;
@@ -401,6 +452,25 @@ export default {
   height: 1080px;
 }
 .input-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border-radius: .25rem;
+    width: 22rem;
+    border-width: 0;
+    border-radius: 0.4rem;
+    box-shadow: 0 2px 6px 0 rgba(114, 124, 245, .5);
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    padding: 0.75rem 1.25rem;
+}
+.input-card2 {
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -413,7 +483,7 @@ export default {
   border-radius: 0.4rem;
   box-shadow: 0 2px 6px 0 rgba(114, 124, 245, .5);
   position: fixed;
-  top: 1rem;
+  bottom: 1rem;
   left: 1rem;
   -ms-flex: 1 1 auto;
   flex: 1 1 auto;
