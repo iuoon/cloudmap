@@ -56,7 +56,7 @@
 
 
     <div class="input-card2">
-      <div id="histogram" style="width: 300px;height: 300px">
+      <div ref="histogram" style="height: 300px">
 
       </div>
     </div>
@@ -68,7 +68,7 @@
   import axios from 'axios'
   import echarts from 'echarts'
 
-  var COLORS = ["#00F61F","#72F657","#B4F67C","#EEF68F","#F6CC84","#F69D6B","#F65D42","#F6231E"];
+  var COLORS = ["#00F61F","#a8f600","#f6f2a5","#f6b489","#f66300","#f691d1","#f600a1","#f6000e"];
 
 
 export default {
@@ -88,18 +88,25 @@ export default {
       city:'',
       area:'',
       attr:"Water",//当前网格属性
-      attrs:[{"label":"Water","value":"Water"},{"label":"SVC","value":"SVC"},{"label":"Aviation","value":"Aviation"}], //选择网格属性
+      attrs:[{"label":"Water","value":"Water"},{"label":"SVC","value":"SVC"},
+        {"label":"Aviation","value":"Aviation"},{"label":"SVN","value":"SVN"},
+        {"label":"SVO","value":"SVO"},{"label":"INDP","value":"INDP"},
+        {"label":"Rail","value":"Rail"},{"label":"INDTT","value":"INDTT"},
+        {"label":"INDT","value":"INDT"},{"label":"UBC","value":"UBC"},
+        {"label":"AGC","value":"AGC"},{"label":"UBN","value":"UBN"},
+        {"label":"RUC","value":"RUC"},{"label":"UBO","value":"UBO"},
+        {"label":"Road","value":"Road"},{"label":"AGN","value":"AGN"},
+        {"label":"AGO","value":"AGO"},{"label":"RUN","value":"RUN"},{"label":"RUO","value":"RUO"}
+      ],
       overlays:[], //选择框
       prezoom:8, //前缩放级别
       currentzoom:8,//当前缩放级别
       year:2007,  //年份
       yearList:[2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019],
-      point:"87.77962526630337,33.53587510891327",
+      point:"114.291362,30.566915",
       ploygons:[],
+      options:{}, //直方图属性
     }
-  },
-  created(){
-    this.initHistogram(this);
   },
   mounted() {
     var userAgent = navigator.userAgent;
@@ -111,6 +118,7 @@ export default {
     this.init();
     this.initCityData();
     this.initHistogram();
+    this.initHistogram(this);
   },
   methods:{
     init (){
@@ -124,7 +132,7 @@ export default {
         mapStyle: 'amap://styles/whitesmoke', //地图样式
         layers: [
           // 卫星
-          new AMap.TileLayer.Satellite(),
+          new AMap.TileLayer.Satellite({opacity:0.7}),
           // 路网
           new AMap.TileLayer.RoadNet({opacity:0.3})
         ],
@@ -146,28 +154,46 @@ export default {
       axios.get("http://localhost:8082/shape/getData/"+self.year+"?point="+self.point).then((res) => {
         let  list= res.data.data
         for(var i = 0,len=list.length; i < len; i++) {
-          var patharr=list[i].the_geom;
-          var num=(this.getAtrrValue(list[i])*10)%8
+          var obj=list[i]
+          var patharr=obj.the_geom;
+
           var polygon = new AMap.Polygon({
             path: patharr,
             strokeColor:"#0f0f0f",
             strokeWeight:1,
             strokeOpacity:0.2,
-            fillColor: COLORS[num],
+            fillColor: self.getColor(self.getAtrrValue(obj)),
             fillOpacity: 0.7,
           });
           polygon.setMap(self.map);
-          polygon.Water=list[i].Water;
-          polygon.SVC=list[i].SVC;
-          polygon.Aviation=list[i].Aviation;
+          polygon.Water=obj.Water;
+          polygon.SVC=obj.SVC;
+          polygon.Aviation=obj.Aviation;
+          polygon.SVN=obj.SVN;
+          polygon.SVO=obj.SVO;
+          polygon.INDP=obj.INDP;
+          polygon.Rail=obj.Rail;
+          polygon.INDTT=obj.INDTT;
+          polygon.INDT=obj.INDT;
+          polygon.UBC=obj.UBC;
+          polygon.AGC=obj.AGC;
+          polygon.UBN=obj.UBN;
+          polygon.RUC=obj.RUC;
+          polygon.UBO=obj.UBO;
+          polygon.Road=obj.Road;
+          polygon.AGN=obj.AGN;
+          polygon.AGO=obj.AGO;
+          polygon.RUN=obj.RUN;
+          polygon.RUO=obj.RUO;
           self.ploygons.push(polygon);
+          polygon.on("click",self.changeSelectGrid);
         }
       })
     },
     //初始化直方图
     initHistogram(){
-      let eChart= echarts.init(document.getElementById('histogram'));
-      var option = {
+      let eChart= echarts.init(this.$refs.histogram);
+      this.option = {
         color: ['#ffef00'],
         tooltip : {
           trigger: 'axis',
@@ -176,7 +202,7 @@ export default {
           }
         },
         grid: {
-          left: '1%',
+          left: '2%',
           right: '2%',
           bottom: '2%',
           containLabel: true
@@ -184,10 +210,11 @@ export default {
         xAxis : [
           {
             type : 'category',
-            data : ['Water', 'SVC', 'Aviation', 'SVN', 'SVO', 'INDP', 'Rail',"INDTT","INDT","UBC","AGC","UBN","RUC","UBO","Road","AGN","AGO","AGO","RUN","RUO"],
+            data : ['Water', 'SVC', 'Aviation', 'SVN', 'SVO', 'INDP', 'Rail',"INDTT","INDT","UBC","AGC","UBN","RUC","UBO","Road","AGN","AGO","RUN","RUO"],
             axisTick: {
               alignWithLabel: true
-            }
+            },
+            scale: true
           }
         ],
         yAxis : [
@@ -199,12 +226,12 @@ export default {
           {
             name:'value',
             type:'bar',
-            barWidth: '60%',
-            data:[10, 2, 2, 2, 2, 2, 2,2,2,2,2,2,2,2,2,2,2,2,2]
+            barWidth: '40%',
+            data:[0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0]
           }
         ]
       };
-      eChart.setOption(option,true);
+      eChart.setOption(this.option);
       this.echart=eChart
     },
     showGrid(){
@@ -219,30 +246,7 @@ export default {
         infoWindow.setContent(e.target.content);
         infoWindow.open(self.map,e.target.getPath()[0]);
       }
-      function changeSelectGrid(e) {
-        if (event.shiftKey !=1) {
-          //判断没有按下shift键则清除之前选中的网格
-          //for(var i=0;i<self.selectPloygons.length;i++){
-          self.map.remove(self.selectPloygons)
-          //}
-          self.selectPloygons=[]
-        }
-        var ploygon=new AMap.Polygon({
-          path: e.target.getPath(),
-          strokeColor:"#ff1b0e",
-          strokeWeight:1,
-          strokeOpacity:1,
-          fillColor: "#fffc00",
-          fillOpacity: 0.7,
-        });
-        ploygon.setMap(self.map);
 
-        self.selectPloygons.push(ploygon);
-        console.log(e)
-        var grid={id:e.target._amap_id}
-        self.selectGrids.push(grid)
-
-      }
 
       for (var i = XY.x1; i < XY.x2; i = i + 0.3) {
         for (var j = XY.y2; j > XY.y1; j = j - 0.3) {
@@ -271,7 +275,7 @@ export default {
             '<input id="downloadBtn" type="button" class="btn" style="margin-left: 25%;margin-top: 8px;" value="下载网格数据" onclick="downloadData()"/>' +
             '</div>';
              //polygon.on("click",infoOpen);
-             polygon.on("click",changeSelectGrid);
+             polygon.on("click",self.changeSelectGrid);
              //polygon.on('mouseover', infoOpen);
              polygon.setMap(self.map);
         }
@@ -309,6 +313,53 @@ export default {
     clearGrid(){
 
     },
+    changeSelectGrid(e) {
+      var self=this;
+      if (event.shiftKey !=1) {
+        //判断没有按下shift键则清除之前选中的网格
+        for(var i=0;i<self.selectPloygons.length;i++){
+          self.map.remove(self.selectPloygons[i])
+        }
+        self.selectPloygons=[]
+      }
+      var ploygon=new AMap.Polygon({
+        path: e.target.getPath(),
+        strokeColor:"#7100f6",
+        strokeWeight:2,
+        strokeOpacity:1,
+        fillColor: "#00f6f5",
+        fillOpacity: 0.7,
+      });
+      ploygon.setMap(self.map);
+
+
+      self.option.series[0].data=[];
+      self.option.series[0].data.push(e.target.Water
+        ,e.target.SVC
+        ,e.target.Aviation
+        ,e.target.SVN
+        ,e.target.SVO
+        ,e.target.INDP
+        ,e.target.Rail
+        ,e.target.INDTT
+        ,e.target.INDT
+        ,e.target.UBC
+        ,e.target.AGC
+        ,e.target.UBN
+        ,e.target.RUC
+        ,e.target.UBO
+        ,e.target.Road
+        ,e.target.AGN
+        ,e.target.AGO
+        ,e.target.RUN
+        ,e.target.RUO)
+      self.echart.setOption(self.option);
+
+      self.selectPloygons.push(ploygon);
+      var grid={id:e.target._amap_id}
+      self.selectGrids.push(grid)
+
+    },
     showAreaBounds(){
       var self=this;
       /*绘制小地图的各个省份的分界线*/
@@ -337,7 +388,6 @@ export default {
     },
     getIds(){
       let ids='';
-      console.log(this.selectGrids)
       for(var i=0;i<this.selectGrids.length;i++){
         if (i==0) {
           ids=ids+this.selectGrids[i].id
@@ -350,14 +400,46 @@ export default {
       return ids;
     },
     getAtrrValue(obj){
-      if(this.attr=='Water'){
-        return obj.Water
-      }
-      if(this.attr=='SVC'){
-        return obj.SVC
-      }
-      if(this.attr=='Aviation'){
-        return obj.Aviation
+      switch (this.attr) {
+        case 'Water':return obj.Water
+          break
+        case 'SVC':return obj.SVC
+          break
+        case 'Aviation':return obj.Aviation
+          break
+        case 'SVN':return obj.SVN
+          break
+        case 'SVO':return obj.SVO
+          break
+        case 'INDP':return obj.INDP
+          break
+        case 'Rail':return obj.Rail
+          break
+        case 'INDTT':return obj.INDTT
+          break
+        case 'INDT':return obj.INDT
+          break
+        case 'UBC':return obj.UBC
+          break
+        case 'AGC':return obj.AGC
+          break
+        case 'UBN':return obj.UBN
+          break
+        case 'RUC':return obj.RUC
+          break
+        case 'UBO':return obj.UBO
+          break
+        case 'Road':return obj.Road
+          break
+        case 'AGN':return obj.AGN
+          break
+        case 'AGO':return obj.AGO
+          break
+        case 'RUN':return obj.RUN
+          break
+        case 'RUO':return obj.RUO
+          break
+        default: return ''
       }
     },
     handleScroll(){
@@ -391,6 +473,22 @@ export default {
           },200)
         }
       })
+    },
+    getColor(val) {
+      var one = (255 + 255) / 40;
+      var r=0,g=0,b=0;
+      if (val < 20)
+      {
+        r = parseInt(one * val);
+        g = 255;
+      }
+      else if (val >= 20 && val < 40)
+      {
+        r = 255;
+        g = 255 - parseInt((val - 20) * one);
+      }
+      else { r = 255; }
+      return "rgb("+r+","+g+","+b+")";;
     },
     //省市区三级加载
     initCityData:function(){
@@ -437,12 +535,11 @@ export default {
     },
     // 选属性
     choseAttr:function(e){
-      console.log(e)
+
       this.attr=e
       for(var i=0;i<this.ploygons.length;i++){
-        var num=this.getAtrrValue(this.ploygons[i])*10%8
-        var color=COLORS[num]
-        this.ploygons[i].fillColor=color
+        var color=this.getColor(this.getAtrrValue(this.ploygons[i]))
+        this.ploygons[i].B.visible=false
       }
     }
   }
@@ -450,10 +547,10 @@ export default {
 </script>
 
 <style scoped>
-.cloudMap{
-  width:100%;
-  height: 720px;
-}
+  .cloudMap {
+    width: 100%;
+    height: 800px;
+    }
 .input-card {
     display: flex;
     flex-direction: column;
@@ -481,16 +578,15 @@ export default {
   background-color: #fff;
   background-clip: border-box;
   border-radius: .25rem;
-  width: 22rem;
+  width: 36rem;
   border-width: 0;
   border-radius: 0.4rem;
-  box-shadow: 0 2px 6px 0 rgba(114, 124, 245, .5);
   position: fixed;
   bottom: 1rem;
   left: 1rem;
   -ms-flex: 1 1 auto;
   flex: 1 1 auto;
   padding: 0.75rem 1.25rem;
-  background: rgba(0,0,0,0);
+  background: rgba(0,0,0,0.0);
 }
 </style>
