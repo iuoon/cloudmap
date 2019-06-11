@@ -76,7 +76,7 @@ export default {
   data () {
     return {
       map:{},
-      eChart:{},
+      echart:{},
       selectGrids:[],
       selectPloygons:[],
       fankui:'',
@@ -165,7 +165,7 @@ export default {
       })
     },
     //初始化直方图
-    initHistogram(self){
+    initHistogram(){
       let eChart= echarts.init(document.getElementById('histogram'));
       var option = {
         color: ['#ffef00'],
@@ -205,7 +205,7 @@ export default {
         ]
       };
       eChart.setOption(option,true);
-
+      this.echart=eChart
     },
     showGrid(){
       var self=this;
