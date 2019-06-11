@@ -11,7 +11,9 @@
             属性：<Select v-model="attr" placeholder="选择属性" style="width:6rem" @on-change="choseAttr">
               <Option v-for="item in attrs" :value="item.value" :key="item.value">{{ item.label }}</Option>
             </Select>
+            <Button type="info" ghost style="margin-left:10px;width: 60px">{{btnSelectText}}</Button>
           </div>
+
         </div>
 
 
@@ -105,6 +107,7 @@ export default {
       point:"114.291362,30.566915",
       ploygons:[],
       options:{}, //直方图属性
+      btnSelectText:'框选'
     }
   },
   mounted() {
@@ -576,16 +579,17 @@ export default {
     background-color: #fff;
     background-clip: border-box;
     border-radius: .25rem;
-    width: 22rem;
+    width: 26rem;
     border-width: 0;
     border-radius: 0.4rem;
-    box-shadow: 0 2px 6px 0 rgba(114, 124, 245, .5);
+    box-shadow: 0 2px 6px 0 rgba(114, 124, 245, .7);
     position: fixed;
     top: 1rem;
     left: 1rem;
     -ms-flex: 1 1 auto;
     flex: 1 1 auto;
     padding: 0.75rem 1.25rem;
+    background: rgba(255,255,255,0.9);
 }
 .input-card2 {
   display: flex;
