@@ -110,10 +110,7 @@ export default {
     }
     this.init();
     this.initCityData();
-
-    this.eChart= echarts.init(document.getElementById('histogram'));
-
-
+    this.initHistogram();
   },
   methods:{
     init (){
@@ -169,8 +166,9 @@ export default {
     },
     //初始化直方图
     initHistogram(self){
+      let eChart= echarts.init(document.getElementById('histogram'));
       var option = {
-        color: ['#3398DB'],
+        color: ['#ffef00'],
         tooltip : {
           trigger: 'axis',
           axisPointer : {            // 坐标轴指示器，坐标轴触发有效
@@ -206,9 +204,8 @@ export default {
           }
         ]
       };
-      if (option && typeof option === "object") {
-        self.eChart.setOption(option);
-      }
+      eChart.setOption(option,true);
+
     },
     showGrid(){
       var self=this;
@@ -494,5 +491,6 @@ export default {
   -ms-flex: 1 1 auto;
   flex: 1 1 auto;
   padding: 0.75rem 1.25rem;
+  background: rgba(0,0,0,0);
 }
 </style>
