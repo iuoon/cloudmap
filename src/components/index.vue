@@ -176,15 +176,15 @@ export default {
           }
         },
         grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
+          left: '1%',
+          right: '2%',
+          bottom: '2%',
           containLabel: true
         },
         xAxis : [
           {
             type : 'category',
-            data : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            data : ['Water', 'SVC', 'Aviation', 'SVN', 'SVO', 'INDP', 'Rail',"INDTT","INDT","UBC","AGC","UBN","RUC","UBO","Road","AGN","AGO","AGO","RUN","RUO"],
             axisTick: {
               alignWithLabel: true
             }
@@ -197,10 +197,10 @@ export default {
         ],
         series : [
           {
-            name:'值',
+            name:'value',
             type:'bar',
             barWidth: '60%',
-            data:[10, 52, 200, 334, 390, 330, 220]
+            data:[10, 2, 2, 2, 2, 2, 2,2,2,2,2,2,2,2,2,2,2,2,2]
           }
         ]
       };
