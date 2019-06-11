@@ -51,14 +51,13 @@
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
           <Button type="success" style="width: 240px">提交反馈信息</Button>
         </div>
+        <div ref="histogram" style="height: 300px;width: 240px;">
+
+        </div>
       </Col>
     </Row>
-
-
     <div class="input-card2">
-      <div ref="histogram" style="height: 300px">
 
-      </div>
     </div>
   </div>
 </template>
@@ -192,8 +191,13 @@ export default {
     },
     //初始化直方图
     initHistogram(){
+      var self=this;
       let eChart= echarts.init(this.$refs.histogram);
       this.option = {
+        title : {
+          text: self.attr,
+          x:'center'
+        },
         color: ['#ffef00'],
         tooltip : {
           trigger: 'axis',
@@ -210,7 +214,7 @@ export default {
         xAxis : [
           {
             type : 'category',
-            data : ['Water', 'SVC', 'Aviation', 'SVN', 'SVO', 'INDP', 'Rail',"INDTT","INDT","UBC","AGC","UBN","RUC","UBO","Road","AGN","AGO","RUN","RUO"],
+            data : ['总值', '平均值', '最大值'],
             axisTick: {
               alignWithLabel: true
             },
@@ -226,8 +230,8 @@ export default {
           {
             name:'value',
             type:'bar',
-            barWidth: '40%',
-            data:[0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0]
+            barWidth: '60%',
+            data:[0, 0, 0]
           }
         ]
       };
@@ -330,34 +334,47 @@ export default {
         fillColor: "#00f6f5",
         fillOpacity: 0.7,
       });
+      ploygon.Water=e.target.Water;
+      ploygon.SVC=e.target.SVC;
+      ploygon.Aviation=e.target.Aviation;
+      ploygon.SVN=e.target.SVN;
+      ploygon.SVO=e.target.SVO;
+      ploygon.INDP=e.target.INDP;
+      ploygon.Rail=e.target.Rail;
+      ploygon.INDTT=e.target.INDTT;
+      ploygon.INDT=e.target.INDT;
+      ploygon.UBC=e.target.UBC;
+      ploygon.AGC=e.target.AGC;
+      ploygon.UBN=e.target.UBN;
+      ploygon.RUC=e.target.RUC;
+      ploygon.UBO=e.target.UBO;
+      ploygon.Road=e.target.Road;
+      ploygon.AGN=e.target.AGN;
+      ploygon.AGO=e.target.AGO;
+      ploygon.RUN=e.target.RUN;
+      ploygon.RUO=e.target.RUO;
       ploygon.setMap(self.map);
-
-
-      self.option.series[0].data=[];
-      self.option.series[0].data.push(e.target.Water
-        ,e.target.SVC
-        ,e.target.Aviation
-        ,e.target.SVN
-        ,e.target.SVO
-        ,e.target.INDP
-        ,e.target.Rail
-        ,e.target.INDTT
-        ,e.target.INDT
-        ,e.target.UBC
-        ,e.target.AGC
-        ,e.target.UBN
-        ,e.target.RUC
-        ,e.target.UBO
-        ,e.target.Road
-        ,e.target.AGN
-        ,e.target.AGO
-        ,e.target.RUN
-        ,e.target.RUO)
-      self.echart.setOption(self.option);
 
       self.selectPloygons.push(ploygon);
       var grid={id:e.target._amap_id}
       self.selectGrids.push(grid)
+
+      var total=0;
+      var max=0;
+      var len=self.selectPloygons.length
+      for(var i=0;i<len;i++){
+        var v=self.getAtrrValue(self.selectPloygons[i]);
+        total+=v;
+        if(v>=max){
+          max=v;
+        }
+      }
+      var avg=total/len
+
+      console.log(total,max,avg)
+      self.option.series[0].data=[];
+      self.option.series[0].data.push(total,avg,max)
+      self.echart.setOption(self.option);
 
     },
     showAreaBounds(){
