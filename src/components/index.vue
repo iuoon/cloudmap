@@ -150,13 +150,20 @@ export default {
     },
     getCurrentBounds() {
        var bs = this.map.getBounds();        //获取当前地图范围的经纬度
-       var bssw = bs.getSouthWest();		//获取西南角的经纬度(左下端点)
+       var bssw = bs.getSouthWest();		//获取西角的经纬度(左下端点)
        var bsne = bs.getNorthEast();		//获取东北角的经纬度(右上端点)
        return { 'x1': bssw.lng, 'y1': bssw.lat, 'x2': bsne.lng, 'y2': bsne.lat };
     },
     initGrid(){
       var self=this;
-      axios.get("http://localhost:8082/shape/getData/"+self.year+"?point="+self.point).then((res) => {
+      console.log("zoom",self.map.getZoom())
+      if (self.map.getZoom()<8){
+        return
+      }
+      var p=self.getCurrentBounds();
+      var lt=p.x1+","+p.y2;
+      var rb=p.x2+","+p.y1;
+      axios.get("http://localhost:8082/shape/getData2/"+self.year+"?ltpoint="+lt+"&rbpoint="+rb).then((res) => {
         let  list= res.data.data
         for(var i = 0,len=list.length; i < len; i++) {
           var obj=list[i]
@@ -191,6 +198,8 @@ export default {
           polygon.RUN=obj.RUN;
           polygon.RUO=obj.RUO;
           self.ploygons.push(polygon);
+
+          polygon.content = ''+obj.ID;
           polygon.on("click",self.changeSelectGrid);
         }
       })
@@ -412,12 +421,11 @@ export default {
     getIds(){
       let ids='';
       for(var i=0;i<this.selectGrids.length;i++){
-        if (i==0) {
-          ids=ids+this.selectGrids[i].id
-        }else if (i/4==0) {
-          ids=ids+'<br>'
-        }else{
-          ids=ids+','+this.selectGrids[i].id
+        if (i<=3) {
+          ids=ids+this.selectGrids[i].id+","
+        }
+        if (i==4) {
+          ids=+" ..."
         }
       }
       return ids;
