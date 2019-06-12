@@ -199,8 +199,11 @@ export default {
           polygon.RUO=obj.RUO;
           self.ploygons.push(polygon);
 
+          var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, 0)});
+          var pMouseover = function () { infoWindow.open(self.map, obj.center_point) };
           polygon.content = ''+obj.ID;
           polygon.on("click",self.changeSelectGrid);
+          polygon.on('mouseover', pMouseover);
         }
       })
     },
