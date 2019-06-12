@@ -11,7 +11,7 @@
             属性：<Select v-model="attr" placeholder="选择属性" style="width:6rem" @on-change="choseAttr">
               <Option v-for="item in attrs" :value="item.value" :key="item.value">{{ item.label }}</Option>
             </Select>
-            <Button type="info" ghost style="margin-left:10px;width: 60px">{{btnSelectText}}</Button>
+            <Button type="info" ghost style="margin-left:10px;width: 80px" @click="multiSelect()">{{multiSelectText}}</Button>
           </div>
 
         </div>
@@ -107,7 +107,9 @@ export default {
       point:"114.291362,30.566915",
       ploygons:[],
       options:{}, //直方图属性
-      btnSelectText:'框选'
+      multiSelectText:'框选',
+      multiSelectFlag:false,
+      mouseTool:{},
     }
   },
   mounted() {
@@ -134,11 +136,12 @@ export default {
         mapStyle: 'amap://styles/whitesmoke', //地图样式
         layers: [
           // 卫星
-          new AMap.TileLayer.Satellite({opacity:0.7}),
+          new AMap.TileLayer.Satellite({opacity:0.3}),
           // 路网
-          new AMap.TileLayer.RoadNet({opacity:0.3})
+          new AMap.TileLayer.RoadNet({opacity:0.1})
         ],
       });
+      this.mouseTool = new AMap.MouseTool(this.map);
       var self=this;
       setTimeout(function () {
         self.initGrid();
@@ -508,7 +511,7 @@ export default {
         g = 255 - parseInt((val - 20) * one);
       }
       else { r = 255; }
-      return "rgb("+r+","+g+","+b+")";;
+      return "rgb("+r+","+g+","+b+",0.5)";;
     },
     //省市区三级加载
     initCityData:function(){
@@ -552,6 +555,33 @@ export default {
        setTimeout(function () {
         self.initGrid();
        },200)
+    },
+    //开启或关闭多选模式
+    multiSelect(){
+      var self=this;
+       if(this.multiSelectFlag){
+         this.multiSelectText='框选'
+         this.multiSelectFlag=false
+         this.mouseTool.close(true)//关闭，并清除覆盖物
+       }else{
+         this.multiSelectText='结束框选'
+         this.multiSelectFlag=true
+         this.mouseTool.rectangle({
+           fillColor:'#00b0ff',
+           strokeColor:'#80d8ff'
+           //同Polygon的Option设置
+         });
+         this.mouseTool.on('draw',function(e){
+           //绘制矩形框结束时触发该事件, //计算哪些框在矩形内
+           //先清除之前选择的，然后重新计算
+           var drawobj=e.obj
+           console.log(222)
+           // for(var i=0;i<self.selectPloygons.length;i++){
+           //   self.map.remove(self.selectPloygons[i])
+           // }
+           self.map.remove(drawobj)
+         })
+       }
     },
     // 选属性
     choseAttr:function(e){
