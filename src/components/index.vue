@@ -589,7 +589,10 @@ export default {
       this.attr=e
       for(var i=0;i<this.ploygons.length;i++){
         var color=this.getColor(this.getAtrrValue(this.ploygons[i]))
-        this.ploygons[i].B.visible=false
+        this.ploygons[i].setOptions({
+          fillColor: color,
+          fillOpacity: 0.7,
+        });
       }
     }
   }
