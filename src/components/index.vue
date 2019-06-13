@@ -157,13 +157,13 @@ export default {
     initGrid(){
       var self=this;
       console.log("zoom",self.map.getZoom())
-      if (self.map.getZoom()<8){
-        return
-      }
+      // if (self.map.getZoom()<8){
+      //   return
+      // }
       var p=self.getCurrentBounds();
       var lt=p.x1+","+p.y2;
       var rb=p.x2+","+p.y1;
-      axios.get("http://localhost:8082/shape/getData2/"+self.year+"?ltpoint="+lt+"&rbpoint="+rb).then((res) => {
+      axios.get("http://localhost:8082/shape/getData2/"+self.year+"?zoom="+self.map.getZoom()+"&ltpoint="+lt+"&rbpoint="+rb).then((res) => {
         let  list= res.data.data
         for(var i = 0,len=list.length; i < len; i++) {
           var obj=list[i]
@@ -203,7 +203,6 @@ export default {
           var pMouseover = function () { infoWindow.open(self.map, obj.center_point) };
           polygon.content = ''+obj.ID;
           polygon.on("click",self.changeSelectGrid);
-          polygon.on('mouseover', pMouseover);
         }
       })
     },
