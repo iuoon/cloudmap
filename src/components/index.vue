@@ -160,12 +160,17 @@ export default {
       // if (self.map.getZoom()<8){
       //   return
       // }
+      self.ploygons=[]
       var p=self.getCurrentBounds();
       var lt=p.x1+","+p.y2;
       var rb=p.x2+","+p.y1;
       axios.get("http://localhost:8082/shape/getData2/"+self.year+"?zoom="+self.map.getZoom()+"&ltpoint="+lt+"&rbpoint="+rb).then((res) => {
+        if(res.data.code != 0){
+          return;
+        }
+        self.map.clearMap()
         let  list= res.data.data
-        for(var i = 0,len=list.length; i < len; i++) {
+        for(var i = 0,len=list.length;i < len; i++) {
           var obj=list[i]
           var patharr=obj.the_geom;
 
@@ -199,12 +204,13 @@ export default {
           polygon.RUO=obj.RUO;
           self.ploygons.push(polygon);
 
-          var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, 0)});
-          var pMouseover = function () { infoWindow.open(self.map, obj.center_point) };
+          // var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, 0)});
+          // var pMouseover = function () { infoWindow.open(self.map, obj.center_point) };
           polygon.content = ''+obj.ID;
           polygon.on("click",self.changeSelectGrid);
         }
       })
+      console.log(self.ploygons.length)
     },
     //初始化直方图
     initHistogram(){
@@ -485,27 +491,25 @@ export default {
       this.$nextTick(function(){
         //缩放级别改变的时候，清除之前的网格覆盖，对网格聚合重建
         if(this.currentzoom != this.prezoom){
-          self.map.clearMap()
-          self.ploygons=[];
           setTimeout(function () {
             self.initGrid();
-          },200)
+          },100)
         }
       })
     },
     updated(){
-      var self=this;
-      console.log(this.currentzoom,this.prezoom)
-      this.$nextTick(function(){
-        //缩放级别改变的时候，清除之前的网格覆盖，对网格聚合重建
-        if(this.currentzoom != this.prezoom){
-           self.map.clearMap()
-           self.ploygons=[];
-           setTimeout(function () {
-            self.initGrid();
-          },200)
-        }
-      })
+      // var self=this;
+      // console.log(this.currentzoom,this.prezoom)
+      // this.$nextTick(function(){
+      //   //缩放级别改变的时候，清除之前的网格覆盖，对网格聚合重建
+      //   if(this.currentzoom != this.prezoom){
+      //      self.map.clearMap()
+      //      self.ploygons=[];
+      //      setTimeout(function () {
+      //       self.initGrid();
+      //     },200)
+      //   }
+      // })
     },
     getColor(val) {
       var one = (255 + 255) / 40;
