@@ -349,6 +349,7 @@ export default {
         }
         self.selectPloygons=[]
       }
+      console.log(JSON.stringify(e.target.getPath()))
       var ploygon=new AMap.Polygon({
         path: e.target.getPath(),
         strokeColor:"#7100f6",
@@ -394,7 +395,6 @@ export default {
       }
       var avg=total/len
 
-      console.log(total,max,avg)
       self.option.series[0].data=[];
       self.option.series[0].data.push(total,avg,max)
       self.echart.setOption(self.option);
