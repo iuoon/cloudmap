@@ -129,6 +129,7 @@ export default {
       this.map = new AMap.Map(this.$refs.cloudMap, {
         center: [114.291362,30.566915],
         zoom: 8,
+        zooms:[7,20],
         resizeEnable: true,
         keyboardEnable: true,//地图是否可通过键盘控制
         dragEnable: true,//地图是否可通过鼠标拖拽平移
@@ -136,17 +137,18 @@ export default {
         mapStyle: 'amap://styles/whitesmoke', //地图样式
         layers: [
           // 卫星
-          new AMap.TileLayer.Satellite({opacity:0.3}),
+          new AMap.TileLayer.Satellite({opacity:0.5}),
           // 路网
-          new AMap.TileLayer.RoadNet({opacity:0.1})
+          new AMap.TileLayer.RoadNet({opacity:0.3})
         ],
       });
+      this.map.on('moveend', this.mapMoveend);
       this.mouseTool = new AMap.MouseTool(this.map);
       var self=this;
       setTimeout(function () {
         self.initGrid();
       },1000)
-      this.showAreaBounds();
+      //this.showAreaBounds();
     },
     getCurrentBounds() {
        var bs = this.map.getBounds();        //获取当前地图范围的经纬度
@@ -160,15 +162,26 @@ export default {
       // if (self.map.getZoom()<8){
       //   return
       // }
-      self.ploygons=[]
+
       var p=self.getCurrentBounds();
-      var lt=p.x1+","+p.y2;
-      var rb=p.x2+","+p.y1;
+      var lt=0;
+      var rb=0;
+      if(this.currentzoom<this.prezoom){
+        lt=(p.x1-1.0)+","+(p.y2+1.0);
+        rb=(p.x2+1.0)+","+(p.y1-1.0);
+      }else{
+        lt=p.x1+","+p.y2;
+        rb=p.x2+","+p.y1;
+      }
+
       axios.get("http://localhost:8082/shape/getData2/"+self.year+"?zoom="+self.map.getZoom()+"&ltpoint="+lt+"&rbpoint="+rb).then((res) => {
         if(res.data.code != 0){
           return;
         }
+
+        self.ploygons=[]
         self.map.clearMap()
+
         let  list= res.data.data
         for(var i = 0,len=list.length;i < len; i++) {
           var obj=list[i]
@@ -178,11 +191,12 @@ export default {
             path: patharr,
             strokeColor:"#0f0f0f",
             strokeWeight:1,
-            strokeOpacity:0.2,
+            strokeOpacity:0.3,
             fillColor: self.getColor(self.getAtrrValue(obj)),
-            fillOpacity: 0.7,
+            fillOpacity: 0.6,
           });
           polygon.setMap(self.map);
+          polygon.ID=obj.ID;
           polygon.Water=obj.Water;
           polygon.SVC=obj.SVC;
           polygon.Aviation=obj.Aviation;
@@ -289,7 +303,7 @@ export default {
              });
             polygon.content =
             '<div className="custom-infowindow input-card">' +
-              '<label style="color:grey">网格数据</label>' +
+              '<label style="color:grey">网格</label>' +
             '<div>' +
             '<div>' +
                '<span class="input-item-text" >'+i+','+j+'</span>' +
@@ -511,21 +525,44 @@ export default {
       //   }
       // })
     },
+    mapMoveend(){
+       //地图移动结束
+      console.log("移动结束开始加载数据")
+      var self=this;
+      setTimeout(function () {
+        self.initGrid();
+      },200)
+    },
     getColor(val) {
-      var one = (255 + 255) / 40;
-      var r=0,g=0,b=0;
-      if (val < 20)
-      {
-        r = parseInt(one * val);
-        g = 255;
+      var bili=val/2;
+      var a=(val%255).toFixed(1)
+      bili=parseInt(bili)
+      if(bili>=255){
+        a=0.8
       }
-      else if (val >= 20 && val < 40)
-      {
+
+      var one = (255+255) / 100;
+      var r=0;
+      var g=0;
+      var b=0;
+
+      if ( bili < 50 ) {
+        // 比例小于50的时候红色是越来越多的,直到红色为255时(红+绿)变为黄色.
+        r = one * bili;
+        g=255;
+      }
+      if ( bili >= 50 ) {
+        // 比例大于50的时候绿色是越来越少的,直到0 变为纯红
+        g =  255 - ( (bili - 50 ) * one) ;
         r = 255;
-        g = 255 - parseInt((val - 20) * one);
       }
-      else { r = 255; }
-      return "rgb("+r+","+g+","+b+",0.5)";;
+      r = parseInt(r);// 取整
+      g = parseInt(g);// 取整
+      b = parseInt(b);// 取整
+      if (bili<=0.0){
+        return "rgb(160,255,160,0.7)";
+      }
+      return "rgb("+r+","+g+","+b+","+a+")";
     },
     //省市区三级加载
     initCityData:function(){
@@ -599,8 +636,18 @@ export default {
     },
     // 选属性
     choseAttr:function(e){
-
+      var self=this;
       this.attr=e
+      self.option.title.text=this.attr;
+      self.option.series[0].data=[];
+      self.option.series[0].data.push(0,0,0)
+      self.echart.setOption(self.option);
+      //清除网格选中
+      for(var i=0;i<self.selectPloygons.length;i++){
+        self.map.remove(self.selectPloygons[i])
+      }
+      self.selectPloygons=[]
+      //改变网格颜色
       for(var i=0;i<this.ploygons.length;i++){
         var color=this.getColor(this.getAtrrValue(this.ploygons[i]))
         this.ploygons[i].setOptions({
