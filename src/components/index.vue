@@ -42,22 +42,41 @@
           </Select>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Input placeholder="请输入邮箱" style="width: 240px"><Icon type="ios-mail" slot="prefix" /></Input>
+          <Button type="info" ghost style="width: 240px">下载选中网格数据</Button>
         </div>
-        <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Button type="success" style="width: 240px">下载选中网格数据</Button>
-        </div>
-        <div style="margin-left: 5px;width: 100%;margin-top: 30px;">
-          <Input v-model="fankui" type="textarea" :rows="4" placeholder="填写反馈信息" style="width: 240px" />
-        </div>
-        <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Button type="success" style="width: 240px">提交反馈信息</Button>
+        <div style="margin-left: 5px;width: 100%;margin-top: 30px;text-align: center">
+            <span>直方图数据统计</span>
         </div>
         <div ref="histogram" style="height: 300px;width: 240px;">
 
         </div>
       </Col>
     </Row>
+    <div class="input-card3">
+      <Button :size="50" icon="ios-create" type="info" shape="circle"></Button>
+    </div>
+    <Modal v-model="showModel1" width="300" class-name="vertical-center-modal">
+      <p slot="header">
+        <span>下载网格数据</span>
+      </p>
+      <div style="text-align:center">
+        <Input placeholder="请输入邮箱" v-model="email" style="width: 260px"><Icon type="ios-mail" slot="prefix" /></Input>
+      </div>
+      <div slot="footer">
+        <Button type="info" size="default" ghost long :loading="modal_loading" @click="del">下载</Button>
+      </div>
+    </Modal>
+    <Modal v-model="showModel2" width="300" class-name="vertical-center-modal">
+      <p slot="header">
+        <span>下载网格数据</span>
+      </p>
+      <div style="text-align:center">
+        <Input v-model="liuyan" type="textarea" :rows="4" placeholder="填写反馈信息" style="width: 240px" />
+      </div>
+      <div slot="footer">
+        <Button type="info" size="default" ghost long :loading="modal_loading" @click="del">下载</Button>
+      </div>
+    </Modal>
     <div class="input-card2">
 
     </div>
@@ -80,7 +99,6 @@ export default {
       echart:{},
       selectGrids:[],
       selectPloygons:[],
-      fankui:'',
       mapJson:'../static/map.json',
       provinceList:[],
       cityList:[],
@@ -110,6 +128,10 @@ export default {
       multiSelectText:'框选',
       multiSelectFlag:false,
       mouseTool:{},
+      showModel1:true,
+      showModel2:false,
+      email:'',
+      liuyan:'',
     }
   },
   mounted() {
@@ -707,4 +729,32 @@ export default {
   padding: 0.75rem 1.25rem;
   background: rgba(0,0,0,0.0);
 }
+
+  .input-card3 {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    width: 50px;
+    border-width: 0;
+    border-radius: 100%;
+    position: fixed;
+    top: 1rem;
+    right: 14rem;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    background: rgba(0,0,0,0.0);
+  }
+  .vertical-center-modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+  .ivu-modal {
+    top: 0;
+  }
+
+  }
 </style>
