@@ -100,8 +100,8 @@ export default {
         {"label":"AGO","value":"AGO"},{"label":"RUN","value":"RUN"},{"label":"RUO","value":"RUO"}
       ],
       overlays:[], //选择框
-      prezoom:8, //前缩放级别
-      currentzoom:8,//当前缩放级别
+      prezoom:9, //前缩放级别
+      currentzoom:9,//当前缩放级别
       year:2007,  //年份
       yearList:[2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019],
       point:"114.291362,30.566915",
@@ -128,7 +128,7 @@ export default {
     init (){
       this.map = new AMap.Map(this.$refs.cloudMap, {
         center: [114.291362,30.566915],
-        zoom: 8,
+        zoom: 9,
         zooms:[7,20],
         resizeEnable: true,
         keyboardEnable: true,//地图是否可通过键盘控制
@@ -648,13 +648,16 @@ export default {
       }
       self.selectPloygons=[]
       //改变网格颜色
-      for(var i=0;i<this.ploygons.length;i++){
-        var color=this.getColor(this.getAtrrValue(this.ploygons[i]))
-        this.ploygons[i].setOptions({
-          fillColor: color,
-          fillOpacity: 0.7,
-        });
-      }
+      setTimeout(function () {
+        for(var i=0;i<self.ploygons.length;i++){
+          var color=self.getColor(self.getAtrrValue(self.ploygons[i]))
+          self.ploygons[i].setOptions({
+            fillColor: color,
+            fillOpacity: 0.7,
+          });
+        }
+      },200)
+
     }
   }
 }
