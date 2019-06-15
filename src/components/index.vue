@@ -23,7 +23,7 @@
           <Card :dis-hover="true" style="width:240px">
             <p slot="title">当前选中网格</p>
             <div style="width:240px"><p>网格编号：{{getIds()}}</p></div>
-            <p>网格信息：</p>
+            <p>网格属性：{{attr}}</p>
           </Card>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
@@ -42,7 +42,7 @@
           </Select>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 10px;">
-          <Button type="info" ghost style="width: 240px">下载选中网格数据</Button>
+          <Button type="success" style="width: 240px" @click="show1">下载选中网格数据</Button>
         </div>
         <div style="margin-left: 5px;width: 100%;margin-top: 30px;text-align: center">
             <span>直方图数据统计</span>
@@ -53,7 +53,7 @@
       </Col>
     </Row>
     <div class="input-card3">
-      <Button :size="50" icon="ios-create" type="info" shape="circle"></Button>
+      <Button  icon="ios-create" type="info" shape="circle" @click="show2"></Button>
     </div>
     <Modal v-model="showModel1" width="300" class-name="vertical-center-modal">
       <p slot="header">
@@ -63,18 +63,18 @@
         <Input placeholder="请输入邮箱" v-model="email" style="width: 260px"><Icon type="ios-mail" slot="prefix" /></Input>
       </div>
       <div slot="footer">
-        <Button type="info" size="default" ghost long :loading="modal_loading" @click="del">下载</Button>
+        <Button type="success" size="default" long  @click="saveDown">下载</Button>
       </div>
     </Modal>
     <Modal v-model="showModel2" width="300" class-name="vertical-center-modal">
       <p slot="header">
-        <span>下载网格数据</span>
+        <span>提交反馈信息</span>
       </p>
       <div style="text-align:center">
-        <Input v-model="liuyan" type="textarea" :rows="4" placeholder="填写反馈信息" style="width: 240px" />
+        <Input v-model="liuyan" type="textarea" :rows="4" placeholder="填写反馈信息" style="width: 260px" />
       </div>
       <div slot="footer">
-        <Button type="info" size="default" ghost long :loading="modal_loading" @click="del">下载</Button>
+        <Button type="success" size="default" long  @click="saveFeedback">提交</Button>
       </div>
     </Modal>
     <div class="input-card2">
@@ -90,14 +90,17 @@
 
   var COLORS = ["#00F61F","#a8f600","#f6f2a5","#f6b489","#f66300","#f691d1","#f600a1","#f6000e"];
 
-
+  var instance = axios.create({
+    baseURL: 'https://localhost:8082/',
+    timeout: 10000,
+    headers: {'content-type': 'application/json'}
+  });
 export default {
   name: 'index',
   data () {
     return {
       map:{},
       echart:{},
-      selectGrids:[],
       selectPloygons:[],
       mapJson:'../static/map.json',
       provinceList:[],
@@ -120,6 +123,7 @@ export default {
       overlays:[], //选择框
       prezoom:9, //前缩放级别
       currentzoom:9,//当前缩放级别
+      precenter:{},
       year:2007,  //年份
       yearList:[2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019],
       point:"114.291362,30.566915",
@@ -128,7 +132,7 @@ export default {
       multiSelectText:'框选',
       multiSelectFlag:false,
       mouseTool:{},
-      showModel1:true,
+      showModel1:false,
       showModel2:false,
       email:'',
       liuyan:'',
@@ -164,6 +168,7 @@ export default {
           new AMap.TileLayer.RoadNet({opacity:0.3})
         ],
       });
+      this.map.on('movestart', this.mapMovestart);
       this.map.on('moveend', this.mapMoveend);
       this.mouseTool = new AMap.MouseTool(this.map);
       var self=this;
@@ -393,6 +398,7 @@ export default {
         fillColor: "#00f6f5",
         fillOpacity: 0.7,
       });
+      ploygon.ID=e.target.ID;
       ploygon.Water=e.target.Water;
       ploygon.SVC=e.target.SVC;
       ploygon.Aviation=e.target.Aviation;
@@ -415,8 +421,6 @@ export default {
       ploygon.setMap(self.map);
 
       self.selectPloygons.push(ploygon);
-      var grid={id:e.target._amap_id}
-      self.selectGrids.push(grid)
 
       var total=0;
       var max=0;
@@ -464,15 +468,10 @@ export default {
     },
     getIds(){
       let ids='';
-      for(var i=0;i<this.selectGrids.length;i++){
-        if (i<=3) {
-          ids=ids+this.selectGrids[i].id+","
-        }
-        if (i==4) {
-          ids=+" ..."
-        }
+      for(var i=0;i<this.selectPloygons.length;i++){
+        ids=ids+this.selectPloygons[i].ID+","
       }
-      return ids;
+      return ids.substr(0,ids.length-1);
     },
     getAtrrValue(obj){
       switch (this.attr) {
@@ -533,23 +532,18 @@ export default {
         }
       })
     },
-    updated(){
-      // var self=this;
-      // console.log(this.currentzoom,this.prezoom)
-      // this.$nextTick(function(){
-      //   //缩放级别改变的时候，清除之前的网格覆盖，对网格聚合重建
-      //   if(this.currentzoom != this.prezoom){
-      //      self.map.clearMap()
-      //      self.ploygons=[];
-      //      setTimeout(function () {
-      //       self.initGrid();
-      //     },200)
-      //   }
-      // })
+    mapMovestart(){
+      this.precenter=this.map.getCenter()
     },
     mapMoveend(){
        //地图移动结束
-      console.log("移动结束开始加载数据")
+      var currcenter=this.map.getCenter()
+      var p1 = [this.precenter.lng, this.precenter.lat];
+      var p2 = [currcenter.lng, currcenter.lat];
+      var dis = AMap.GeometryUtil.distance(p1, p2)/1000;
+      if(dis<3){
+        return
+      }
       var self=this;
       setTimeout(function () {
         self.initGrid();
@@ -680,6 +674,74 @@ export default {
         }
       },200)
 
+    },
+    show1(){
+      this.showModel1=true;
+    },
+    show2(){
+      this.showModel2=true;
+    },
+    saveDown(){
+      var self=this;
+      if (self.email==''){
+        self.$Message.error({
+          content: '请输入邮箱',
+          duration: 2
+        })
+        return
+      }
+      if (self.selectPloygons.length<=0){
+        self.$Message.error({
+          content: '请选择网格',
+          duration: 2
+        })
+        return
+      }
+      axios.post("http://localhost:8082/map/down/save",JSON.stringify({email:self.email,grid:self.getIds(),attr:self.attr}),
+        {headers: {'Content-Type': 'application/json'}}
+      ).then(function (res) {
+        console.log(res.data);
+        self.showModel1=false
+        if (res.data.code == 0){
+          self.$Message.success({
+            content: res.data.msg,
+            duration: 2
+          })
+        } else{
+          self.$Message.error({
+            content: res.data.msg,
+            duration: 2
+          })
+        }
+      }).catch(function (error) {console.log(error) });
+    },
+    saveFeedback(){
+      var self=this;
+      if (self.liuyan==''){
+        self.$Message.error({
+          content: '请输入内容',
+          duration: 2
+        })
+        return
+      }
+      axios.post("http://localhost:8082/map/feedback/save",JSON.stringify({content:self.liuyan}),
+        {headers: {'Content-Type': 'application/json'}}
+      ).then(function (res) {
+        console.log(res.data);
+        self.showModel2=false
+        if (res.data.code == 0){
+          self.$Message.success({
+            content: res.data.msg,
+            duration: 2
+          })
+        } else{
+
+          self.$Message.error({
+            content: res.data.msg,
+            duration: 2
+          })
+        }
+      }).catch(function (error) {console.log(error) });
     }
   }
 }
