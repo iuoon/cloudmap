@@ -243,6 +243,7 @@ export default {
           polygon.AGO=obj.AGO;
           polygon.RUN=obj.RUN;
           polygon.RUO=obj.RUO;
+          polygon.center_point=obj.center_point;
           self.ploygons.push(polygon);
 
           // var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, 0)});
@@ -303,80 +304,7 @@ export default {
       this.echart=eChart
     },
     showGrid(){
-      var self=this;
-      var XY = this.getCurrentBounds();
-      console.log(XY);
-      var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, 0)});
-      function infoClose(e) {
-        infoWindow.close(self.map, e.target.getPosition());
-      }
-      function infoOpen(e) {
-        infoWindow.setContent(e.target.content);
-        infoWindow.open(self.map,e.target.getPath()[0]);
-      }
 
-
-      for (var i = XY.x1; i < XY.x2; i = i + 0.3) {
-        for (var j = XY.y2; j > XY.y1; j = j - 0.3) {
-             var num=Math.floor(Math.random()*6);
-          //此类表示绘制一个多边形覆盖物（注意:一定要下面的Point列表为多变形的顶点,描线顺序为从上到下,从左到右，顺序乱了,绘制出来的多边形也会乱，如图二所示，图二是将顶点的顺序给错了（网格左上端点,网格///左下端点，网格右上端点，网格右下端点））
-             var polygon = new AMap.Polygon({
-               path: [[i, j],[i, j-0.3],[i+0.3, j-0.3],[i+0.3, j]],
-               strokeColor:"#ccc",
-               strokeWeight:1,
-               strokeOpacity:0.2,
-               fillColor: COLORS[num],
-               fillOpacity: 0.07*num,
-             });
-            polygon.content =
-            '<div className="custom-infowindow input-card">' +
-              '<label style="color:grey">网格</label>' +
-            '<div>' +
-            '<div>' +
-               '<span class="input-item-text" >'+i+','+j+'</span>' +
-            '</div>' +
-            '</div>' +
-            '<div>' +
-              '<span class="input-item-text" >邮箱：</span>' +
-              '<input id="m_email" type="mail"/>' +
-            '</div>' +
-            '<input id="downloadBtn" type="button" class="btn" style="margin-left: 25%;margin-top: 8px;" value="下载网格数据" onclick="downloadData()"/>' +
-            '</div>';
-             //polygon.on("click",infoOpen);
-             polygon.on("click",self.changeSelectGrid);
-             //polygon.on('mouseover', infoOpen);
-             polygon.setMap(self.map);
-        }
-      }
-
-
-
-      var polygon_t = new AMap.Polygon({
-        path: [[115.79011490197605,44.89508474224183],[115.91679790903335,44.88538600295825],[115.90297162495256,44.79638930050085],[115.77643316632485,44.80610526526714]],
-        strokeColor:"#ccc",
-        strokeWeight:1,
-        strokeOpacity:0.2,
-        fillColor: "#cc0019",
-        fillOpacity: 1,
-      });
-      polygon_t.setMap(self.map);
-
-      var mouseTool = new AMap.MouseTool(self.map);
-      mouseTool.rectangle({
-        fillColor:'#00b0ff',
-        strokeColor:'#80d8ff'
-        //同Polygon的Option设置
-      });
-      mouseTool.on('draw',function(e){
-        //绘制矩形框结束时触发该事件, //计算哪些框在矩形内
-        //先清除之前选择的，然后重新计算
-        var drawobj=e.obj
-        console.log(222)
-        // for(var i=0;i<self.selectPloygons.length;i++){
-        //   self.map.remove(self.selectPloygons[i])
-        // }
-        self.map.remove(drawobj)
-      })
     },
     clearGrid(){
 
@@ -393,7 +321,7 @@ export default {
       var ploygon=new AMap.Polygon({
         path: e.target.getPath(),
         strokeColor:"#7100f6",
-        strokeWeight:2,
+        strokeWeight:1,
         strokeOpacity:1,
         fillColor: "#00f6f5",
         fillOpacity: 0.7,
@@ -418,6 +346,7 @@ export default {
       ploygon.AGO=e.target.AGO;
       ploygon.RUN=e.target.RUN;
       ploygon.RUO=e.target.RUO;
+      ploygon.center_point=e.target.center_point;
       ploygon.setMap(self.map);
 
       self.selectPloygons.push(ploygon);
@@ -438,6 +367,42 @@ export default {
       self.option.series[0].data=[];
       self.option.series[0].data.push(total,avg,max)
       self.echart.setOption(self.option);
+
+    },
+    changeSelectGrid2(obj) {
+      var self=this;
+      var ploygon=new AMap.Polygon({
+        path: obj.getPath(),
+        strokeColor:"#7100f6",
+        strokeWeight:1,
+        strokeOpacity:1,
+        fillColor: "#00f6f5",
+        fillOpacity: 0.7,
+      });
+      ploygon.ID=obj.ID;
+      ploygon.Water=obj.Water;
+      ploygon.SVC=obj.SVC;
+      ploygon.Aviation=obj.Aviation;
+      ploygon.SVN=obj.SVN;
+      ploygon.SVO=obj.SVO;
+      ploygon.INDP=obj.INDP;
+      ploygon.Rail=obj.Rail;
+      ploygon.INDTT=obj.INDTT;
+      ploygon.INDT=obj.INDT;
+      ploygon.UBC=obj.UBC;
+      ploygon.AGC=obj.AGC;
+      ploygon.UBN=obj.UBN;
+      ploygon.RUC=obj.RUC;
+      ploygon.UBO=obj.UBO;
+      ploygon.Road=obj.Road;
+      ploygon.AGN=obj.AGN;
+      ploygon.AGO=obj.AGO;
+      ploygon.RUN=obj.RUN;
+      ploygon.RUO=obj.RUO;
+      ploygon.center_point=obj.center_point;
+      ploygon.setMap(self.map);
+
+      self.selectPloygons.push(ploygon);
 
     },
     showAreaBounds(){
@@ -541,7 +506,7 @@ export default {
       var p1 = [this.precenter.lng, this.precenter.lat];
       var p2 = [currcenter.lng, currcenter.lat];
       var dis = AMap.GeometryUtil.distance(p1, p2)/1000;
-      if(dis<3){
+      if(dis<5){
         return
       }
       var self=this;
@@ -551,6 +516,9 @@ export default {
     },
     getColor(val) {
       var bili=val/2;
+      if(bili>=255){
+        bili=255;
+      }
       var a=(val%255).toFixed(1)
       bili=parseInt(bili)
       if(bili>=255){
@@ -576,7 +544,7 @@ export default {
       g = parseInt(g);// 取整
       b = parseInt(b);// 取整
       if (bili<=0.0){
-        return "rgb(160,255,160,0.7)";
+        return "rgb(160,255,160,0.5)";
       }
       return "rgb("+r+","+g+","+b+","+a+")";
     },
@@ -642,10 +610,35 @@ export default {
            //绘制矩形框结束时触发该事件, //计算哪些框在矩形内
            //先清除之前选择的，然后重新计算
            var drawobj=e.obj
-           console.log(222)
-           // for(var i=0;i<self.selectPloygons.length;i++){
-           //   self.map.remove(self.selectPloygons[i])
-           // }
+           var bounds = e.obj.getPath();
+           //清除之前选中的网格
+           for(var i=0;i<self.selectPloygons.length;i++){
+             self.map.remove(self.selectPloygons[i])
+           }
+           self.selectPloygons=[]
+           //选中网格
+           for(var i=0;i<self.ploygons.length;i++){
+             var isPointInRing =  AMap.GeometryUtil.isPointInRing(self.ploygons[i].center_point,bounds);
+             if(isPointInRing){
+               self.changeSelectGrid2(self.ploygons[i])
+             }
+           }
+           //统计重新计算
+           var total=0;
+           var max=0;
+           var len=self.selectPloygons.length
+           for(var i=0;i<len;i++){
+             var v=self.getAtrrValue(self.selectPloygons[i]);
+             total+=v;
+             if(v>=max){
+               max=v;
+             }
+           }
+           var avg=total/len
+           self.option.series[0].data=[];
+           self.option.series[0].data.push(total,avg,max)
+           self.echart.setOption(self.option);
+           //清除选则框
            self.map.remove(drawobj)
          })
        }
