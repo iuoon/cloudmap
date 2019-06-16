@@ -91,7 +91,7 @@
   var COLORS = ["#00F61F","#a8f600","#f6f2a5","#f6b489","#f66300","#f691d1","#f600a1","#f6000e"];
 
   var instance = axios.create({
-    baseURL: 'https://localhost:8082/',
+    baseURL: 'https://68.168.141.54:8082/',
     timeout: 10000,
     headers: {'content-type': 'application/json'}
   });
@@ -201,7 +201,7 @@ export default {
         rb=p.x2+","+p.y1;
       }
 
-      axios.get("http://localhost:8082/shape/getData2/"+self.year+"?zoom="+self.map.getZoom()+"&ltpoint="+lt+"&rbpoint="+rb).then((res) => {
+      axios.get("http://68.168.141.54:8082/shape/getData2/"+self.year+"?zoom="+self.map.getZoom()+"&ltpoint="+lt+"&rbpoint="+rb).then((res) => {
         if(res.data.code != 0){
           return;
         }
@@ -511,7 +511,7 @@ export default {
       var p1 = [this.precenter.lng, this.precenter.lat];
       var p2 = [currcenter.lng, currcenter.lat];
       var dis = AMap.GeometryUtil.distance(p1, p2)/1000;
-      if(dis<18.0){
+      if(dis<22.0){
         return
       }
       var self=this;
@@ -702,7 +702,7 @@ export default {
         })
         return
       }
-      axios.post("http://localhost:8082/map/down/save",JSON.stringify({email:self.email,grid:self.getIds(),attr:self.attr}),
+      axios.post("http://68.168.141.54:8082/map/down/save",JSON.stringify({email:self.email,grid:self.getIds(),attr:self.attr}),
         {headers: {'Content-Type': 'application/json'}}
       ).then(function (res) {
         console.log(res.data);
@@ -729,7 +729,7 @@ export default {
         })
         return
       }
-      axios.post("http://localhost:8082/map/feedback/save",JSON.stringify({content:self.liuyan}),
+      axios.post("http://68.168.141.54:8082/map/feedback/save",JSON.stringify({content:self.liuyan}),
         {headers: {'Content-Type': 'application/json'}}
       ).then(function (res) {
         console.log(res.data);
