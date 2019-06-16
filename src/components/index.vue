@@ -511,7 +511,7 @@ export default {
       var p1 = [this.precenter.lng, this.precenter.lat];
       var p2 = [currcenter.lng, currcenter.lat];
       var dis = AMap.GeometryUtil.distance(p1, p2)/1000;
-      if(dis<20.0){
+      if(dis<18.0){
         return
       }
       var self=this;
