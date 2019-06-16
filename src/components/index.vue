@@ -246,10 +246,15 @@ export default {
           polygon.center_point=obj.center_point;
           self.ploygons.push(polygon);
 
-          // var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, 0)});
-          // var pMouseover = function () { infoWindow.open(self.map, obj.center_point) };
-          polygon.content = ''+obj.ID;
+          var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(-10, -10)});
+          var pMouseover = function (e) {
+            infoWindow.setContent(e.target.content);
+            infoWindow.open(self.map, e.target.center_point)
+          };
+          polygon.content = '' + this.getAtrrValue(polygon);
+          polygon.on('mouseover', pMouseover);
           polygon.on("click",self.changeSelectGrid);
+
         }
       })
       console.log(self.ploygons.length)
@@ -506,7 +511,7 @@ export default {
       var p1 = [this.precenter.lng, this.precenter.lat];
       var p2 = [currcenter.lng, currcenter.lat];
       var dis = AMap.GeometryUtil.distance(p1, p2)/1000;
-      if(dis<5){
+      if(dis<20.0){
         return
       }
       var self=this;
@@ -664,6 +669,13 @@ export default {
             fillColor: color,
             fillOpacity: 0.7,
           });
+          var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(-10, -10)});
+          var pMouseover = function (e) {
+            infoWindow.setContent(e.target.content);
+            infoWindow.open(self.map, e.target.center_point)
+          };
+          self.ploygons[i].content = '' + self.getAtrrValue(self.ploygons[i]);
+          self.ploygons[i].on('mouseover', pMouseover);
         }
       },200)
 
